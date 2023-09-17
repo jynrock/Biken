@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 5f, locationListener)
     }
 
     private fun stopTracking() {
