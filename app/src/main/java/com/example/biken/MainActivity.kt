@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
-                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${distanceTravelled.toInt()} m"
+                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${String.format("%.1f", distanceTravelled / 1000)} km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             score = 0
             distanceTravelled = 0f
             findViewById<TextView>(R.id.tv_score).text = "Score: $score"
-            findViewById<TextView>(R.id.tv_distance).text = "Distance: ${distanceTravelled.toInt()} m"
+            findViewById<TextView>(R.id.tv_distance).text = "Distance: ${distanceTravelled.toInt()} Km"
 
             with(sharedPref.edit()) {
                 putInt("score", score)

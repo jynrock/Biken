@@ -37,7 +37,7 @@
         android:id="@+id/tv_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Distance: 0 m"
+        android:text="Distance: 0 Km"
         android:textSize="30sp"
         android:layout_marginBottom="150dp" />
 
