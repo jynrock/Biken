@@ -7,6 +7,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Handler
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
     private val TOLERANCE = 5f // Définissez la tolérance à 5 mètres
+    private val ALPHA = 0.1f // Coefficient de filtrage
 
     private val sharedPref by lazy {
         getSharedPreferences("BikenPrefs", Context.MODE_PRIVATE)
@@ -31,7 +33,8 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 if (lastLocation != null) {
-                    val distance = lastLocation!!.distanceTo(it)
+                    var distance = lastLocation!!.distanceTo(it)
+                    distance = filterNoise(distance, distanceTravelled)
                     if (distance > TOLERANCE) {
                         distanceTravelled += distance
                     }
@@ -79,7 +82,9 @@ class MainActivity : AppCompatActivity() {
         val btnStartStop = findViewById<Button>(R.id.btn_start_stop)
         btnStartStop.setOnClickListener {
             if (btnStartStop.text == "Start") {
-                startTracking()
+                Handler().postDelayed({
+                    startTracking()
+                }, 30000) // 30 secondes de pause pour la stabilisation du GPS
                 btnStartStop.text = "Stop"
             } else {
                 stopTracking()
@@ -108,8 +113,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000L, 5f, locationListener)
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000L, 5f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 5f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 5f, locationListener)
     }
 
     private fun stopTracking() {
@@ -122,5 +127,9 @@ class MainActivity : AppCompatActivity() {
             putInt("score", score)
             apply()
         }
+    }
+
+    private fun filterNoise(newValue: Float, oldValue: Float): Float {
+        return oldValue + ALPHA * (newValue - oldValue)
     }
 }
