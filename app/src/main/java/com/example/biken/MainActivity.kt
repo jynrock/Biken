@@ -7,7 +7,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.os.Handler
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
     private val TOLERANCE = 5f // Définissez la tolérance à 5 mètres
-    private val ALPHA = 0.1f // Coefficient de filtrage
 
     private val sharedPref by lazy {
         getSharedPreferences("BikenPrefs", Context.MODE_PRIVATE)
@@ -33,8 +31,7 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 if (lastLocation != null) {
-                    var distance = lastLocation!!.distanceTo(it)
-                    distance = filterNoise(distance, distanceTravelled)
+                    val distance = lastLocation!!.distanceTo(it)
                     if (distance > TOLERANCE) {
                         distanceTravelled += distance
                     }
@@ -82,9 +79,7 @@ class MainActivity : AppCompatActivity() {
         val btnStartStop = findViewById<Button>(R.id.btn_start_stop)
         btnStartStop.setOnClickListener {
             if (btnStartStop.text == "Start") {
-                Handler().postDelayed({
-                    startTracking()
-                }, 30000) // 30 secondes de pause pour la stabilisation du GPS
+                startTracking()
                 btnStartStop.text = "Stop"
             } else {
                 stopTracking()
@@ -127,9 +122,5 @@ class MainActivity : AppCompatActivity() {
             putInt("score", score)
             apply()
         }
-    }
-
-    private fun filterNoise(newValue: Float, oldValue: Float): Float {
-        return oldValue + ALPHA * (newValue - oldValue)
     }
 }
