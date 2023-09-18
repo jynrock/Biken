@@ -27,12 +27,12 @@ class MainActivity : AppCompatActivity() {
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             location?.let {
-                if (it.accuracy > 5) { // ignorez les mises à jour avec une précision inférieure à 20 mètres
+                if (it.accuracy > 5) { // ignorez les mises à jour avec une précision inférieure à 5 mètres
                     return
                 }
                 if (lastLocation != null) {
                     val distance = lastLocation!!.distanceTo(it)
-                    if (distance > TOLERANCE) { // TOLERANCE est une constante que vous définissez, par exemple 5m
+                    if (distance > TOLERANCE) {
                         distanceTravelled += distance
                     }
                     val timeDifference = (it.time - lastLocation!!.time) / 1000 // convertir le temps en secondes
@@ -45,9 +45,8 @@ class MainActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
                     findViewById<TextView>(R.id.tv_distance).text = "Distance: ${distanceTravelled.toInt()} m"
 
-                    if (distanceTravelled >= 200) {
+                    if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
-                        // distanceTravelled = 0f  // Commentez ou supprimez cette ligne pour conserver la distance totale parcourue
                         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
                     }
                 }
@@ -75,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         score = sharedPref.getInt("score", 0)
         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
 
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val btnStartStop = findViewById<Button>(R.id.btn_start_stop)
         btnStartStop.setOnClickListener {
@@ -103,12 +102,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTracking() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
             return
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000L, 5f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000L, 5f, locationListener)
     }
 
     private fun stopTracking() {
