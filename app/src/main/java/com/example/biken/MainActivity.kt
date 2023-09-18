@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
                     if (distanceTravelled >= 200) {
                         score += 1
-                        // distanceTravelled = 0f  // Commentez ou supprimez cette ligne pour conserver la distance totale parcourue
+                        distanceTravelled -= 200 // Soustraire 200 pour suivre correctement chaque intervalle de 200 mètres
                         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
                     }
                 }
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 5f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 10f, locationListener)
     }
 
     private fun stopTracking() {
