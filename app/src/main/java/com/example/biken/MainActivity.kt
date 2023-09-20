@@ -30,20 +30,30 @@ class MainActivity : AppCompatActivity() {
                 if (it.accuracy > 5) { // ignorez les mises à jour avec une précision inférieure à 5 mètres
                     return
                 }
+
+                val distanceInMeters: Float // variable pour stocker la distance en mètres
                 if (lastLocation != null) {
-                    val distance = lastLocation!!.distanceTo(it)
-                    if (distance > TOLERANCE) {
-                        distanceTravelled += distance
+                    distanceInMeters = lastLocation!!.distanceTo(it)
+                    if (distanceInMeters > TOLERANCE) {
+                        distanceTravelled += distanceInMeters // distanceTravelled en mètres
                     }
                     val timeDifference = (it.time - lastLocation!!.time) / 1000 // convertir le temps en secondes
                     val speed: Float = if (timeDifference > 0) {
-                        (distance / timeDifference) * 3.6f  // convertir en km/h
+                        (distanceInMeters / timeDifference) * 3.6f  // convertir en km/h
                     } else {
                         location.speed * 3.6f // utiliser la vitesse fournie par l'API, convertie en km/h
                     }
 
-                    findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
-                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${String.format("%.1f", distanceTravelled / 1000)} km"
+                    // Réinitialiser la vitesse à 0 si la distance est trop petite
+                    if (distanceInMeters < TOLERANCE) {
+                        findViewById<TextView>(R.id.tv_speed).text = "Vitesse: 0 Km/h"
+                    } else {
+                        findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
+                    }
+
+                    // Convertir distanceTravelled à Km avant de l'afficher
+                    val distanceInKm = distanceTravelled / 1000 // conversion de mètres à kilomètres
+                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${"%.1f".format(distanceInKm)} Km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
