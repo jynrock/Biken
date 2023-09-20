@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
     private var distanceTravelled = 0f // en mètres
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
-    private val TOLERANCE = 5f // Définissez la tolérance à 5 mètres
+
+    private val recentLocations = mutableListOf<Location>()
 
     private val sharedPref by lazy {
         getSharedPreferences("BikenPrefs", Context.MODE_PRIVATE)
@@ -31,28 +32,32 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
 
-                val distanceInMeters: Float // variable pour stocker la distance en mètres
+                recentLocations.add(it)
+                recentLocations.retainAll { loc -> loc.time >= it.time - 3000 }
+
+                val distanceInMeters: Float
                 if (lastLocation != null) {
                     distanceInMeters = lastLocation!!.distanceTo(it)
-                    if (distanceInMeters > TOLERANCE) {
-                        distanceTravelled += distanceInMeters // distanceTravelled en mètres
-                    }
-                    val timeDifference = (it.time - lastLocation!!.time) / 1000 // convertir le temps en secondes
+                    distanceTravelled += distanceInMeters
+
+                    val timeDifference = (it.time - lastLocation!!.time) / 1000
                     val speed: Float = if (timeDifference > 0) {
-                        (distanceInMeters / timeDifference) * 3.6f  // convertir en km/h
+                        (distanceInMeters / timeDifference) * 3.6f
                     } else {
-                        location.speed * 3.6f // utiliser la vitesse fournie par l'API, convertie en km/h
+                        location.speed * 3.6f
                     }
 
-                    // Réinitialiser la vitesse à 0 si la distance est trop petite
-                    if (distanceInMeters < TOLERANCE) {
+                    val recentDistance = recentLocations.mapIndexed { index, loc ->
+                        if (index == 0) 0f else recentLocations[index - 1].distanceTo(loc)
+                    }.sum()
+
+                    if (recentDistance < 5) {
                         findViewById<TextView>(R.id.tv_speed).text = "Vitesse: 0 Km/h"
                     } else {
                         findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
                     }
 
-                    // Convertir distanceTravelled à Km avant de l'afficher
-                    val distanceInKm = distanceTravelled / 1000 // conversion de mètres à kilomètres
+                    val distanceInKm = distanceTravelled / 1000
                     findViewById<TextView>(R.id.tv_distance).text = "Distance: ${"%.1f".format(distanceInKm)} Km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
@@ -102,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             score = 0
             distanceTravelled = 0f
             findViewById<TextView>(R.id.tv_score).text = "Score: $score"
-            findViewById<TextView>(R.id.tv_distance).text = "Distance: ${distanceTravelled.toInt()} Km"
+            findViewById<TextView>(R.id.tv_distance).text = "Distance: 0.0 Km"
 
             with(sharedPref.edit()) {
                 putInt("score", score)
