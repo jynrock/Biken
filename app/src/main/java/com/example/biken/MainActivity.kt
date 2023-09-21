@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private var distanceTravelled = 0f // en mètres
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
-
     private val recentLocations = mutableListOf<Location>()
 
     private val sharedPref by lazy {
@@ -58,7 +58,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     val distanceInKm = distanceTravelled / 1000
-                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${"%.1f".format(distanceInKm)} Km"
+                    val formatter = DecimalFormat("#.0")
+                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${formatter.format(distanceInKm)} Km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             score = 0
             distanceTravelled = 0f
             findViewById<TextView>(R.id.tv_score).text = "Score: $score"
-            findViewById<TextView>(R.id.tv_distance).text = "Distance: 0.0 Km"
+            findViewById<TextView>(R.id.tv_distance).text = "Distance: 0 Km"
 
             with(sharedPref.edit()) {
                 putInt("score", score)
