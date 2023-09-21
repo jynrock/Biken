@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 recentLocations.add(it)
-                recentLocations.retainAll { loc -> loc.time >= it.time - 3000 }
+                recentLocations.retainAll { loc -> loc.time >= it.time - 5000 }
 
                 val distanceInMeters: Float
                 if (lastLocation != null) {
