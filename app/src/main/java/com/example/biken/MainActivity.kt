@@ -35,9 +35,8 @@ class MainActivity : AppCompatActivity() {
                 recentLocations.add(it)
                 recentLocations.retainAll { loc -> loc.time >= it.time - 5000 }
 
-                val distanceInMeters: Float
                 if (lastLocation != null) {
-                    distanceInMeters = lastLocation!!.distanceTo(it)
+                    val distanceInMeters = lastLocation!!.distanceTo(it)
                     distanceTravelled += distanceInMeters
 
                     val timeDifference = (it.time - lastLocation!!.time) / 1000
@@ -47,19 +46,18 @@ class MainActivity : AppCompatActivity() {
                         location.speed * 3.6f
                     }
 
-                    val recentDistance = recentLocations.mapIndexed { index, loc ->
+                    val recentDistance = recentLocations.takeIf { it.size > 1 }?.mapIndexed { index, loc ->
                         if (index == 0) 0f else recentLocations[index - 1].distanceTo(loc)
-                    }.sum()
+                    }?.sum() ?: 0f
 
                     if (recentDistance < 5) {
-                        findViewById<TextView>(R.id.tv_speed).text = "Vitesse: 0 Km/h"
+                        findViewById<TextView>(R.id.tv_speed).text = "Vitesse: 0.0 Km/h"
                     } else {
                         findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
                     }
 
-                    val distanceInKm = distanceTravelled / 1000
-                    val formatter = DecimalFormat("#.0")
-                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${formatter.format(distanceInKm)} Km"
+                    val formatter = DecimalFormat("0.0")
+                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${formatter.format(distanceTravelled / 1000)} Km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
