@@ -11,7 +11,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,8 +55,8 @@ class MainActivity : AppCompatActivity() {
                         findViewById<TextView>(R.id.tv_speed).text = "Vitesse: ${speed.toInt()} Km/h"
                     }
 
-                    val formatter = DecimalFormat("0.0")
-                    findViewById<TextView>(R.id.tv_distance).text = "Distance: ${formatter.format(distanceTravelled / 1000)} Km"
+                    val distanceInKm = truncateTo1DecimalPlace(distanceTravelled / 1000)
+                    findViewById<TextView>(R.id.tv_distance).text = "Distance: $distanceInKm Km"
 
                     if (distanceTravelled >= 200 * (score + 1)) {
                         score += 1
@@ -136,5 +135,9 @@ class MainActivity : AppCompatActivity() {
             putInt("score", score)
             apply()
         }
+    }
+
+    private fun truncateTo1DecimalPlace(value: Float): Float {
+        return (value * 10).toInt() / 10f
     }
 }
