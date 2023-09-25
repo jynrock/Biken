@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     private var score = 0
     private var distanceTravelled = 0f // en mètres
+    private var distanceAtLastScore = 0f
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
     private val recentLocations = mutableListOf<Location>()
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             location?.let {
-                if (it.accuracy > 5) { // ignorez les mises à jour avec une précision inférieure à 5 mètres
+                if (it.accuracy > 5) {
                     return
                 }
 
@@ -58,8 +59,9 @@ class MainActivity : AppCompatActivity() {
                     val distanceInKm = truncateTo1DecimalPlace(distanceTravelled / 1000)
                     findViewById<TextView>(R.id.tv_distance).text = "Distance: $distanceInKm Km"
 
-                    if (distanceTravelled >= 200 * (score + 1)) {
+                    if (distanceTravelled - distanceAtLastScore >= 200) {
                         score += 1
+                        distanceAtLastScore += 200
                         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
                     }
                 }
@@ -67,17 +69,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-            // Pas besoin d'implémentation ici
-        }
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
 
-        override fun onProviderEnabled(provider: String) {
-            // Pas besoin d'implémentation ici
-        }
+        override fun onProviderEnabled(provider: String) {}
 
-        override fun onProviderDisabled(provider: String) {
-            // Pas besoin d'implémentation ici
-        }
+        override fun onProviderDisabled(provider: String) {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         score = sharedPref.getInt("score", 0)
+        distanceAtLastScore = sharedPref.getFloat("distanceAtLastScore", 0f)
         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -123,6 +120,9 @@ class MainActivity : AppCompatActivity() {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 5f, locationListener)
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 5f, locationListener)
+
+        distanceTravelled = 0f
+        lastLocation = null
     }
 
     private fun stopTracking() {
@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         with(sharedPref.edit()) {
             putInt("score", score)
+            putFloat("distanceAtLastScore", distanceAtLastScore)
             apply()
         }
     }
