@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     private var score = 0
     private var distanceTravelled = 0f // en mètres
+    private var scoreThreshold = 200f  // Distance requise pour augmenter le score
     private var lastLocation: Location? = null
     private lateinit var locationManager: LocationManager
     private val recentLocations = mutableListOf<Location>()
@@ -58,8 +59,9 @@ class MainActivity : AppCompatActivity() {
                     val distanceInKm = truncateTo1DecimalPlace(distanceTravelled / 1000)
                     findViewById<TextView>(R.id.tv_distance).text = "Distance: $distanceInKm Km"
 
-                    if (distanceTravelled >= 200 * (score + 1)) {
+                    if (distanceTravelled >= scoreThreshold) {
                         score += 1
+                        scoreThreshold += 200f // Augmente le seuil pour le prochain point de score
                         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
                     }
                 }
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         score = sharedPref.getInt("score", 0)
         distanceTravelled = sharedPref.getFloat("distanceTravelled", 0f)
+        scoreThreshold = sharedPref.getFloat("scoreThreshold", 200f)
         findViewById<TextView>(R.id.tv_score).text = "Score: $score"
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -99,11 +102,13 @@ class MainActivity : AppCompatActivity() {
         btnReset.setOnClickListener {
             score = 0
             distanceTravelled = 0f
+            scoreThreshold = 200f
             findViewById<TextView>(R.id.tv_score).text = "Score: $score"
             findViewById<TextView>(R.id.tv_distance).text = "Distance: 0 Km"
             with(sharedPref.edit()) {
                 putInt("score", score)
                 putFloat("distanceTravelled", distanceTravelled)
+                putFloat("scoreThreshold", scoreThreshold)
                 apply()
             }
         }
@@ -130,6 +135,7 @@ class MainActivity : AppCompatActivity() {
         with(sharedPref.edit()) {
             putInt("score", score)
             putFloat("distanceTravelled", distanceTravelled)
+            putFloat("scoreThreshold", scoreThreshold)
             apply()
         }
     }
